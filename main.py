@@ -5,9 +5,13 @@ from kivy.uix.textinput import TextInput  # Widget para entrada de texto
 from kivy.uix.button import Button  # Widget botão clicável
 from kivy.graphics import Color, Rectangle  # Para desenhar o fundo colorido
 from plyer import notification  # Biblioteca que permite notificação local no sistema
-
+from threading import Timer
 from logica import calcularSaida  # Função externa que calcula o horário de saída
+from kivy.core.text import LabelBase
 
+# exemplo de uso de labelbase, necessita fazer o download do arquivo e especificar o caminho fonte
+#LabelBase.register(name='Roboto', fn_regular='fonts/Roboto-Regular.ttf')
+#font_name='Roboto'
 
 class N1ClockLayout(BoxLayout):
     def __init__(self, **kwargs):
@@ -15,8 +19,8 @@ class N1ClockLayout(BoxLayout):
 
         # Define que os widgets serão organizados verticalmente
         self.orientation = 'vertical'
-        self.padding = 20  # Espaço interno entre borda e widgets
-        self.spacing = 20  # Espaço entre os widgets
+        self.padding = 15  # aumenta o padding geral (margem interna)
+        self.spacing = 15  # aumenta espaço entre widgets
 
         # --- COR DE FUNDO (para evitar tela preta) ---
         with self.canvas.before:
@@ -29,27 +33,58 @@ class N1ClockLayout(BoxLayout):
         # --- CRIA OS WIDGETS ---
 
         # Label com instrução
-        self.label = Label(text='Cálculo de saída')
-        self.label = Label(text='Digite o horário de entrada (HH:MM):')
+        self.label_titulo = Label(text="[b]N1Clock \n    0.15[/b]",
+                                  markup=True,
+                                  font_size=24)  # Fonte maior para o título
+        self.add_widget(self.label_titulo)
+        
+        self.label = Label(text='Digite o horário de entrada (HH:MM):', font_size=18)  # Fonte maior para instrução
         self.add_widget(self.label)  # Adiciona a label no layout
 
         # Campo para digitar o horário de entrada
-        self.input_hora = TextInput(multiline=False, hint_text='08:00')
+        self.input_hora = TextInput(
+            multiline=False,
+            hint_text='08:00',
+            font_size=18,
+            size_hint_y=None,  # altura fixa para melhor visual
+            height=40,
+            size_hint_x=None,
+            width=500,
+            pos_hint={"center_x": 0.5}
+        )
         self.add_widget(self.input_hora)
 
         # Botão para disparar o cálculo
-        self.btn_calcular = Button(text='Calcular horário de saída')
+        self.btn_calcular = Button(
+            text='Calcular horário de saída',
+            size_hint_y=None,  # altura fixa para uniformidade
+            height=70,
+            size_hint_x=None,
+            width=300,
+            font_size=16,
+            pos_hint={"center_x": 0.5}
+        )
         self.btn_calcular.bind(on_press=self.calcular_saida)  # Liga o clique do botão à função calcular_saida
         self.add_widget(self.btn_calcular)
 
         # Label para mostrar o resultado do cálculo
-        self.resultado = Label(text='')
+        self.resultado = Label(text='', font_size=18)  # Fonte maior para resultado
         self.add_widget(self.resultado)
 
         # --- BOTÃO DE TESTE DE NOTIFICAÇÃO ---
-        self.btn_notificacao = Button(text='Testar notificação')
+        self.btn_notificacao = Button(
+            text='Testar notificação',
+            size_hint=(0.4, None),  # 40% da largura, altura fixa para deixar menor
+            height=35,
+            font_size=14,
+            pos_hint={"center_x": 0.5}  # centralizado horizontalmente
+        )
         self.btn_notificacao.bind(on_press=self.enviar_notificacao)
         self.add_widget(self.btn_notificacao)
+        
+        #rodapé
+        self.rodape = Label(text='Kayke @ 2025', font_size=15)
+        self.add_widget(self.rodape)
 
     def _update_rect(self, instance, value):
         """
