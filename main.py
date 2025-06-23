@@ -5,13 +5,16 @@ from kivy.uix.textinput import TextInput  # Widget para entrada de texto
 from kivy.uix.button import Button  # Widget botão clicável
 from kivy.graphics import Color, Rectangle  # Para desenhar o fundo colorido
 from plyer import notification  # Biblioteca que permite notificação local no sistema
-from threading import Timer
+
+from kivy.uix.floatlayout import FloatLayout  # Layout que permite posicionamento absoluto e por porcentagem
+from kivy.uix.widget import Widget  # Usado para inserir espaçadores invisíveis
+from kivy.core.text import LabelBase  # Usado para registrar fontes personalizadas
+
 from logica import calcularSaida  # Função externa que calcula o horário de saída
-from kivy.core.text import LabelBase
 
 # exemplo de uso de labelbase, necessita fazer o download do arquivo e especificar o caminho fonte
-#LabelBase.register(name='Roboto', fn_regular='fonts/Roboto-Regular.ttf')
-#font_name='Roboto'
+# LabelBase.register(name='Roboto', fn_regular='fonts/Roboto-Regular.ttf')
+# font_name='Roboto'
 
 class N1ClockLayout(BoxLayout):
     def __init__(self, **kwargs):
@@ -19,15 +22,18 @@ class N1ClockLayout(BoxLayout):
 
         # Define que os widgets serão organizados verticalmente
         self.orientation = 'vertical'
-        self.padding = 15  # aumenta o padding geral (margem interna)
-        self.spacing = 15  # aumenta espaço entre widgets
+        self.padding = 20  # Define margem interna ao redor de todo o layout
+        self.spacing = 20  # Define o espaço vertical entre os widgets (PODE ALTERAR AQUI)
+        self.size_hint = (0.9, None)  # Largura relativa à tela (90%), altura fixa
+        self.height = self.minimum_height  # Ajusta altura com base no conteúdo
+        self.pos_hint = {'center_x': 0.5, 'center_y': 0.5}  # Centraliza o layout na tela
 
         # --- COR DE FUNDO (para evitar tela preta) ---
         with self.canvas.before:
-            Color(0, 0, 0, 0)  # Define a cor (RGBA)
-            self.rect = Rectangle(size=self.size, pos=self.pos)  # Desenha um retângulo do tamanho do layout
+            Color(0, 0, 0, 0)  # Define a cor de fundo transparente
+            self.rect = Rectangle(size=self.size, pos=self.pos)  # Desenha o fundo
 
-        # Atualiza o retângulo caso o tamanho ou posição mudem (redimensionamento de janela)
+        # Atualiza retângulo ao redimensionar
         self.bind(size=self._update_rect, pos=self._update_rect)
 
         # --- CRIA OS WIDGETS ---
@@ -37,9 +43,12 @@ class N1ClockLayout(BoxLayout):
                                   markup=True,
                                   font_size=24)  # Fonte maior para o título
         self.add_widget(self.label_titulo)
-        
-        self.label = Label(text='Digite o horário de entrada (HH:MM):', font_size=18)  # Fonte maior para instrução
-        self.add_widget(self.label)  # Adiciona a label no layout
+
+        # --- Espaçamento adicional abaixo do título ---
+        self.add_widget(Widget(size_hint_y=None, height=10))  # AUMENTE O "height" AQUI para mais espaçamento
+
+        self.label = Label(text='Digite o horário de entrada (HH:MM):', font_size=18)
+        self.add_widget(self.label)
 
         # Campo para digitar o horário de entrada
         self.input_hora = TextInput(
@@ -49,8 +58,8 @@ class N1ClockLayout(BoxLayout):
             size_hint_y=None,  # altura fixa para melhor visual
             height=40,
             size_hint_x=None,
-            width=500,
-            pos_hint={"center_x": 0.5}
+            width=500,  # Largura do campo de texto
+            pos_hint={"center_x": 0.5}  # Centraliza horizontalmente
         )
         self.add_widget(self.input_hora)
 
@@ -81,8 +90,8 @@ class N1ClockLayout(BoxLayout):
         )
         self.btn_notificacao.bind(on_press=self.enviar_notificacao)
         self.add_widget(self.btn_notificacao)
-        
-        #rodapé
+
+        # rodapé
         self.rodape = Label(text='Kayke @ 2025', font_size=15)
         self.add_widget(self.rodape)
 
@@ -123,16 +132,17 @@ class N1ClockLayout(BoxLayout):
             message='Notificação de teste funcionando!',
         )
 
-
 class N1ClockApp(App):
     def build(self):
         """
         Método obrigatório da classe App.
         Deve retornar o widget raiz da interface, que será mostrado na tela.
-        Aqui, retorna a nossa tela principal N1ClockLayout.
+        Aqui, retorna a nossa tela principal N1ClockLayout, centralizada.
         """
-        return N1ClockLayout()
-
+        root = FloatLayout()  # Cria o layout de fundo principal
+        layout_central = N1ClockLayout()  # Instancia nosso layout customizado
+        root.add_widget(layout_central)  # Adiciona ao centro da tela
+        return root
 
 if __name__ == '__main__':
     N1ClockApp().run()  # Inicia o loop principal do app Kivy
